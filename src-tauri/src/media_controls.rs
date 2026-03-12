@@ -113,7 +113,7 @@ pub fn update(np: &NowPlaying) {
             album: np.album.as_deref(),
             // Cover URL - souvlaki supports URLs on some platforms
             cover_url: np.image_url.as_deref(),
-            duration: np.duration.map(std::time::Duration::from_secs),
+            duration: np.duration.map(std::time::Duration::from_secs_f64),
         };
 
         if let Err(e) = controls.set_metadata(metadata) {

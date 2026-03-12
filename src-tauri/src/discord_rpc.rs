@@ -83,8 +83,8 @@ fn update_discord_activity(
         .map(|d| d.as_millis() as i64)
         .unwrap_or(0);
 
-    let elapsed_ms = np.elapsed.unwrap_or(0) as i64 * 1000;
-    let duration_ms = np.duration.unwrap_or(0) as i64 * 1000;
+    let elapsed_ms = (np.elapsed.unwrap_or(0.0) * 1000.0) as i64;
+    let duration_ms = (np.duration.unwrap_or(0.0) * 1000.0) as i64;
 
     let started = current_time - elapsed_ms;
     let end = if duration_ms > 0 {
