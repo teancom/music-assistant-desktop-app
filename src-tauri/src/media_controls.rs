@@ -76,12 +76,23 @@ fn handle_media_event(event: MediaControlEvent) {
         MediaControlEvent::Next => "next",
         MediaControlEvent::Previous => "previous",
         MediaControlEvent::Stop => "stop",
-        _ => return, // Ignore other events like seek, volume, etc.
+        _ => return,
     };
 
-    // Call the registered callback
     if let Some(ref callback) = *EVENT_CALLBACK.lock() {
         callback(command);
+    }
+}
+
+/// Determine the playback state category from now-playing info
+#[cfg(test)]
+fn determine_playback_state(is_playing: bool, has_track: bool) -> &'static str {
+    if is_playing {
+        "playing"
+    } else if has_track {
+        "paused"
+    } else {
+        "stopped"
     }
 }
 
@@ -128,5 +139,18 @@ pub fn clear() {
     let mut controls = MEDIA_CONTROLS.lock();
     if let Some(ref mut controls) = *controls {
         let _ = controls.set_playback(MediaPlayback::Stopped);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_determine_playback_state() {
+        assert_eq!(determine_playback_state(true, true), "playing");
+        assert_eq!(determine_playback_state(true, false), "playing");
+        assert_eq!(determine_playback_state(false, true), "paused");
+        assert_eq!(determine_playback_state(false, false), "stopped");
     }
 }
