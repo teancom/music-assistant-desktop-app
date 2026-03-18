@@ -22,6 +22,7 @@ static MEDIA_CONTROLS: Mutex<Option<MediaControls>> = Mutex::new(None);
 static EVENT_CALLBACK: Mutex<Option<MediaControlCallback>> = Mutex::new(None);
 
 /// Initialize media controls
+#[allow(unused_variables)]
 pub fn init(callback: MediaControlCallback, hwnd_param: Option<*mut std::ffi::c_void>) {
     // Store the callback
     {
