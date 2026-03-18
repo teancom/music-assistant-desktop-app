@@ -1198,4 +1198,31 @@ mod tests {
             ResolvedVolumeMode::None
         );
     }
+
+    #[test]
+    fn test_build_volume_state_msg_produces_valid_json() {
+        let msg = build_volume_state_msg(75, false);
+        assert!(msg.is_some());
+        // Parse the message text
+        if let Some(WsMessage::Text(text)) = msg {
+            let value: serde_json::Value = serde_json::from_str(&text).unwrap();
+            // Check structure
+            assert_eq!(value["type"], "client/state");
+            assert_eq!(value["payload"]["player"]["volume"], 75);
+            assert_eq!(value["payload"]["player"]["muted"], false);
+        } else {
+            panic!("Expected Text message");
+        }
+    }
+
+    #[test]
+    fn test_build_volume_state_msg_muted() {
+        let msg = build_volume_state_msg(0, true);
+        assert!(msg.is_some());
+        if let Some(WsMessage::Text(text)) = msg {
+            let value: serde_json::Value = serde_json::from_str(&text).unwrap();
+            assert_eq!(value["payload"]["player"]["volume"], 0);
+            assert_eq!(value["payload"]["player"]["muted"], true);
+        }
+    }
 }
