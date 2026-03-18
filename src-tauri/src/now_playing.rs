@@ -19,9 +19,9 @@ pub struct NowPlaying {
     /// Player ID
     pub player_id: Option<String>,
     /// Duration in seconds
-    pub duration: Option<u64>,
+    pub duration: Option<f64>,
     /// Elapsed time in seconds
-    pub elapsed: Option<u64>,
+    pub elapsed: Option<f64>,
     /// Whether play action is available
     #[serde(default)]
     pub can_play: bool,

@@ -28,12 +28,12 @@ fn extract_discord_fields(np: &NowPlaying) -> (&str, &str, &str, &str) {
 /// Takes elapsed and duration in seconds, returns (`start_timestamp`, `end_timestamp`) in milliseconds
 /// `current_time_ms` is the current Unix timestamp in milliseconds (allows for testing with fixed time)
 fn calculate_discord_timestamps(
-    elapsed_secs: Option<u64>,
-    duration_secs: Option<u64>,
+    elapsed_secs: Option<f64>,
+    duration_secs: Option<f64>,
     current_time_ms: i64,
 ) -> (i64, i64) {
-    let elapsed_ms = elapsed_secs.unwrap_or(0) as i64 * 1000;
-    let duration_ms = duration_secs.unwrap_or(0) as i64 * 1000;
+    let elapsed_ms = (elapsed_secs.unwrap_or(0.0) * 1000.0) as i64;
+    let duration_ms = (duration_secs.unwrap_or(0.0) * 1000.0) as i64;
     let started = current_time_ms - elapsed_ms;
     let end = if duration_ms > 0 {
         current_time_ms + (duration_ms - elapsed_ms)
@@ -145,24 +145,24 @@ mod tests {
 
     #[test]
     fn test_calculate_discord_timestamps() {
-        type TimestampCase = (Option<u64>, Option<u64>, i64, i64, i64);
+        type TimestampCase = (Option<f64>, Option<f64>, i64, i64, i64);
         let t = 100_000i64;
         // (elapsed, duration, current_time) → (expected_start, expected_end)
         let cases: Vec<TimestampCase> = vec![
             // Normal playback: 30s into a 180s track
-            (Some(30), Some(180), t, t - 30_000, t + 150_000),
+            (Some(30.0), Some(180.0), t, t - 30_000, t + 150_000),
             // No duration → end=0
-            (Some(30), None, t, t - 30_000, 0),
+            (Some(30.0), None, t, t - 30_000, 0),
             // Zero duration → end=0
-            (Some(30), Some(0), t, t - 30_000, 0),
+            (Some(30.0), Some(0.0), t, t - 30_000, 0),
             // No elapsed, no duration → start=current, end=0
             (None, None, t, t, 0),
             // Elapsed exceeds duration (track overran)
-            (Some(180), Some(120), t, t - 180_000, t - 60_000),
+            (Some(180.0), Some(120.0), t, t - 180_000, t - 60_000),
             // Large values (1hr into 2hr track)
             (
-                Some(3600),
-                Some(7200),
+                Some(3600.0),
+                Some(7200.0),
                 1_000_000_000,
                 1_000_000_000 - 3_600_000,
                 1_000_000_000 + 3_600_000,
