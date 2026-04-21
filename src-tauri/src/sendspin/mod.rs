@@ -419,9 +419,18 @@ async fn run_client(
             .into_iter()
             .map(|f| AudioFormatSpec {
                 codec: "pcm".to_string(),
-                channels: f.channels as _,
+                // `SupportedPcmFormat` holds `u16` fields for parity with
+                // cpal's `ChannelCount`, but `AudioFormatSpec` uses `u8`.
+                // `build_formats` only ever emits `channels: 2` and
+                // `bit_depth: 16 | 24`, so the narrowing is safe — but
+                // `try_from().expect` documents the invariant explicitly
+                // and would catch a future regression loudly rather than
+                // silently truncating.
+                channels: u8::try_from(f.channels)
+                    .expect("SupportedPcmFormat only ever emits channels: 2"),
                 sample_rate: f.sample_rate,
-                bit_depth: f.bit_depth as _,
+                bit_depth: u8::try_from(f.bit_depth)
+                    .expect("SupportedPcmFormat only ever emits bit_depth: 16 or 24"),
             })
             .collect();
 
